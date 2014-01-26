@@ -7,8 +7,6 @@
 #ifndef __SNAKEOBJECTS_H__
 #define __SNAKEOBJECTS_H__
 
-#define SNAKE_CONSOLE_HEIGHT 80
-#define SNAKE_CONSOLE_WIDTH 50
 #define SNAKE_MIN_LENGTH 2
 #define SNAKE_DIRECTION_DEFAULT DirectionEast
 
@@ -81,8 +79,9 @@ namespace SnakeObjects
 		virtual LocationList& Generate() = 0;
 	};
 
-	class SinglePartGenerator : IPartGenerator
+	class SinglePartGenerator : public IPartGenerator
 	{
+	public:
 		LocationList& Generate();
 	};
 

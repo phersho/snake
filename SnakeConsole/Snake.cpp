@@ -1,6 +1,7 @@
-#include <exception>
 #include "stdafx.h"
 #include "SnakeObjects.h"
+
+#include <exception>
 
 namespace SnakeObjects
 {

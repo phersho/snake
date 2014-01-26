@@ -16,6 +16,9 @@
     <Filter Include="Source Files\SnakeObjects">
       <UniqueIdentifier>{66f057f3-7e1e-462b-9bba-c489772e5f22}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\View">
+      <UniqueIdentifier>{baf0c37a-ead1-4df0-8c8f-9f9ecc3b882f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -28,6 +31,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SnakeObjects.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -46,6 +52,9 @@
     </ClCompile>
     <ClCompile Include="Location.cpp">
       <Filter>Source Files\SnakeObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsoleView.cpp">
+      <Filter>Source Files\View</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
