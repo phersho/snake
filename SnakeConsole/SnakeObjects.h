@@ -21,11 +21,11 @@ namespace SnakeObjects
 		DirectionWest
 	};
 
-	enum Turn
+	enum TurnSnake
 	{
-		TurnNone,
-		TurnLeft,
-		TurnRight
+		TurnSnakeNone,
+		TurnSnakeLeft,
+		TurnSnakeRight
 	};
 
 	class Location;
@@ -34,7 +34,8 @@ namespace SnakeObjects
 	class IPartGenerator;
 
 	typedef std::list<Location> LocationList;
-	typedef std::stack<Location> LocationStack;
+    typedef LocationList* LocationListPointer;
+    typedef Location* LocationPointer;
 
 	class Location
 	{
@@ -47,12 +48,18 @@ namespace SnakeObjects
 
 		int GetX() const;
 		int GetY() const;
+        void Set(Location& other);
 
 		int GetDistance(Location& other) const;
-		Direction GetDirection(Location& start, Location& end) const;
-		Location& GetDestiny(Direction direction, int length) const;
+		LocationPointer GetDestiny(Direction direction, int length) const;
+		bool IsTarget(Direction direction, Location& other) const;
+        bool IsBetween(Location& begin, Location& end) const;
+        bool IsInLineWith(Location& other) const;
 
-		static LocationList& BuildList(Location& start, int length, Direction direction);
+		static Direction GetDirection(Location& start, Location& end);
+		static LocationListPointer BuildList(Location& start, int length, Direction direction);
+
+        bool operator==(Location& other) const;
 	};
 
 	class Snake
@@ -60,7 +67,7 @@ namespace SnakeObjects
 	private:
 		int length;
 		Direction direction;
-		LocationList body;
+		LocationListPointer body;
 
 	public:
 		Snake(int length, Location initial);
@@ -68,21 +75,26 @@ namespace SnakeObjects
 
 		Direction GetDirection();
 		void SetDirection(Direction newDirection);
-		bool CanOverlap(Location location);
-		bool IsCollided();
+		LocationListPointer GetBody();
+		bool CanOverlap(Location& location);
+		bool IsHead(Location& other);
 		bool IsCollided(Location location);
+		bool IsTarget(Location& location);
+		void Advance(LocationListPointer list);
 	};
 
 	class IPartGenerator
 	{
 	public:
-		virtual LocationList& Generate() = 0;
+		Stage* Stage;
+		Snake* Snake;
+		virtual LocationListPointer Generate() = 0;
 	};
 
 	class SinglePartGenerator : public IPartGenerator
 	{
 	public:
-		LocationList& Generate();
+		LocationListPointer Generate();
 	};
 
 	class Stage
@@ -92,6 +104,7 @@ namespace SnakeObjects
 		Snake* snake;
 		Direction direction;
 		IPartGenerator* generator;
+        LocationListPointer newParts;
 
 	public:
 		Stage(int height, int width, IPartGenerator* generator);
@@ -100,7 +113,10 @@ namespace SnakeObjects
 		int GetHeight();
 		int GetWidth();
 		Direction GetDirection();
-		void SetDirection(Direction newDirection);
+        Snake* GetSnake();
+		bool MakeTurnAction(TurnSnake action);
+        void PlayTurn();
 	};
 }
+
 #endif

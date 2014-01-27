@@ -17,7 +17,7 @@ namespace SnakeObjects
 
 		this->length = length;
 		direction = SNAKE_DIRECTION_DEFAULT;
-		body = Location::BuildList(initial, length, DirectionEast);
+		body = Location::BuildList(initial, length, DirectionWest);
 	}
 
 	/*
@@ -25,7 +25,9 @@ namespace SnakeObjects
 	 */
 	Snake::~Snake()
 	{
-		body.clear();
+        body->clear();
+        delete body;
+
 		length = 0;
 		direction = DirectionNone;
 	}
@@ -43,25 +45,80 @@ namespace SnakeObjects
 	 */
 	void Snake::SetDirection(Direction newDirection)
 	{
-		throw new std::logic_error("Not Implemented.");
 		direction = newDirection;
 	}
 
-	bool Snake::CanOverlap(Location location)
+	/*
+	 * Gets access to body inside.
+	 */
+	LocationListPointer Snake::GetBody()
 	{
-		throw new std::logic_error("Not Implemented.");
+		return body;
+	}
+
+	bool Snake::CanOverlap(Location& location)
+	{
+        Location previous = body->front();
+        for (auto current = body->begin(); current != body->end(); ++current)
+        {
+            if (previous == *current)
+            {
+                continue;
+            }
+
+            if (location.IsBetween(previous, *current))
+            {
+                return true;
+            }
+        }
 		return false;
 	}
 
-	bool Snake::IsCollided()
+	bool Snake::IsTarget(Location& location)
 	{
-		throw new std::logic_error("Not Implemented.");
-		return false;
+        return body->front().IsTarget(direction, location);
+	}
+
+	bool Snake::IsHead(Location& other)
+	{
+        return other == body->front();
 	}
 
 	bool Snake::IsCollided(Location location)
 	{
-		throw new std::logic_error("Not Implemented.");
-		return false;
+        return IsTarget(location) && body->front().GetDistance(location) == 0;
 	}
+
+    void Snake::Advance(LocationListPointer list)
+    {
+        Location head = body->front();
+        bool withoutNews = true;
+
+        // evaluates if snake will have new parts
+        for (auto i = list->begin(); i != list->end(); ++i)
+        {
+            if (head.IsTarget(direction, *i)
+                && head.GetDistance(*i) != 0)
+            {
+                head.Set(*i);
+                withoutNews = false;
+                break;
+            }
+        }
+
+        if (withoutNews)
+        {
+            Location lastChecked = head;
+            
+            for (auto i = list->begin(); i != list->end(); ++i)
+            {
+                if (lastChecked == *i)
+                {
+                    continue;
+                }
+
+
+            }
+        }
+    }
 }

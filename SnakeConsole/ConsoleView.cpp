@@ -1,16 +1,28 @@
 #include "stdafx.h"
 #include "ConsoleView.h"
 
+/*
+ * Console implementations from [ http://benryves.com/tutorials/winconsole/ ].
+ */
+
 namespace ConsoleView
 {
 	SnakeView::SnakeView(short height, short width)
 	{
 		InitializeView(height, width);
+
+		SinglePartGenerator* g = new SinglePartGenerator();
+		stage = new Stage(height, width, g);
+		g->Snake = stage->GetSnake();
+		g->Stage = stage;
+
 		ClearBuffer();
 	}
 
 	SnakeView::~SnakeView()
 	{
+		delete[] consoleBuffer;
+		delete stage;
 	}
 
 	void SnakeView::InitializeView(short height, short width)
@@ -46,9 +58,16 @@ namespace ConsoleView
 		consoleWriteArea.Right = height - 1;
 		consoleWriteArea.Bottom = width - 1;
 
-		backgroundChar = ' ';
-		backgroundColor = BACKGROUND_BLUE | BACKGROUND_GREEN
-			| BACKGROUND_RED | BACKGROUND_INTENSITY;
+		stageChar = ' ';
+		stageColor = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY;
+
+		snakePart = (char)0x09;
+		snakeBody = (char)0xDB;
+		snakeHeadNorth = (char)0x1E;
+		snakeHeadSouth = (char)0x1F;
+		snakeHeadEast = (char)0x10;
+		snakeHeadWest = (char)0x11;
+		snakeColor = FOREGROUND_GREEN | stageColor;
 	}
 
 	void SnakeView::ClearBuffer()
@@ -58,8 +77,8 @@ namespace ConsoleView
 		for (int i = 0; i < countMax; ++i)
 		{
 			CHAR_INFO* current = consoleBuffer + i;
-			current->Char.AsciiChar = backgroundChar;
-			current->Attributes = backgroundColor;
+			current->Char.AsciiChar = stageChar;
+			current->Attributes = stageColor;
 		}
 	}
 	
@@ -77,7 +96,7 @@ namespace ConsoleView
 		}
 	}
 
-	void SnakeView::Run()
+	void SnakeView::Play()
 	{
 		DWORD numEvents = 0;
 		DWORD numEventsRead = 0;
@@ -106,9 +125,10 @@ namespace ConsoleView
 					}
 				}
 
-				// Clean up our event buffer:
 				delete[] eventBuffer;
 			}
+
+			PlayTurn();
 
 			if (redrawBuffer)
 			{
@@ -134,6 +154,14 @@ namespace ConsoleView
 			FillConsoleRandomly();
 			redrawBuffer = true;
 		}
+		else if (e.wVirtualKeyCode == VK_LEFT)
+		{
+			stage->MakeTurnAction(TurnSnakeLeft);
+		}
+		else if (e.wVirtualKeyCode == VK_RIGHT)
+		{
+			stage->MakeTurnAction(TurnSnakeRight);
+		}
 	}
 
 	void SnakeView::HandleMouse(MOUSE_EVENT_RECORD& e)
@@ -141,24 +169,74 @@ namespace ConsoleView
 		// Set the index to our buffer of CHAR_INFO
 		int offsetPos = e.dwMousePosition.X 
 			+ bufferSize.X * e.dwMousePosition.Y;
+		CHAR_INFO* position = consoleBuffer + (e.dwMousePosition.X + bufferSize.X * e.dwMousePosition.Y);
 
 		// left
 		if (e.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED) 
 		{
-			consoleBuffer[offsetPos].Char.AsciiChar = (char)0xDB;
+			position->Char.AsciiChar = snakeBody;
+			position->Attributes = snakeColor;
 			redrawBuffer = true;
 		}
 		// right
 		else if (e.dwButtonState & RIGHTMOST_BUTTON_PRESSED)
 		{
-			consoleBuffer[offsetPos].Char.AsciiChar = (char)0xB1;
+			position->Char.AsciiChar = (char)0xB1;
+			position->Attributes = snakeColor;
 			redrawBuffer = true;
 		}
 		// middle
 		else if (e.dwButtonState & FROM_LEFT_2ND_BUTTON_PRESSED)
 		{
-			consoleBuffer[offsetPos].Char.AsciiChar = backgroundChar;
+			position->Char.AsciiChar = stageChar;
+			position->Attributes = stageColor;
 			redrawBuffer = true;
 		}
 	}
+
+	void SnakeView::PlayTurn()
+	{
+        //stage->PlayTurn();
+        LocationListPointer body = stage->GetSnake()->GetBody();
+		
+        ClearBuffer(); // TODO research how to avoid it
+
+        for (int y = 0; y < bufferSize.Y; ++y)
+        {
+            for (int x = 0; x < bufferSize.X; ++x)
+            {
+                CHAR_INFO* current = consoleBuffer + (x + bufferSize.X * y);
+
+                Location currentLocation(x, y);
+
+                if (stage->GetSnake()->CanOverlap(currentLocation))
+                {
+                    current->Char.AsciiChar = stage->GetSnake()->IsHead(currentLocation) 
+                        ? GetHeadChar() : snakeBody;
+                    current->Attributes = snakeColor;
+                }
+                else
+                {
+                    current->Char.AsciiChar = stageChar;
+                    current->Attributes = stageColor;
+                }
+            }
+        }
+	}
+
+    char SnakeView::GetHeadChar()
+    {
+        switch (stage->GetSnake()->GetDirection())
+        {
+        case DirectionNorth:
+            return snakeHeadNorth;
+        case DirectionSouth:
+            return snakeHeadSouth;
+        case DirectionEast:
+            return snakeHeadEast;
+        case DirectionWest:
+            return snakeHeadWest;
+        }
+        return snakeBody;
+    }
 }

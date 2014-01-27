@@ -56,5 +56,8 @@
     <ClCompile Include="ConsoleView.cpp">
       <Filter>Source Files\View</Filter>
     </ClCompile>
+    <ClCompile Include="PartGenerator.cpp">
+      <Filter>Source Files\SnakeObjects</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

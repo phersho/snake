@@ -7,19 +7,11 @@
 
 using ConsoleView::SnakeView;
 
-void Test();
-
 int _tmain(int argc, _TCHAR* argv[])
 {	
-	SnakeView sv = SnakeView(SNAKE_CONSOLE_HEIGHT, SNAKE_CONSOLE_WIDTH);
+	SnakeView sv = SnakeView(SNAKE_CONSOLE_HEIGHT / 2, SNAKE_CONSOLE_WIDTH / 2);
 
-	sv.Run();
+	sv.Play();
 
 	return 0;
-}
-
-void Test()
-{
-	SnakeObjects::Snake* snake = new SnakeObjects::Snake(3, SnakeObjects::Location(5, 5));
-	delete snake;
 }

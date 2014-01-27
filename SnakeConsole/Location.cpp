@@ -25,12 +25,18 @@ namespace SnakeObjects
 		return y;
 	}
 
+    void Location::Set(Location& other)
+    {
+        x = other.x;
+        y = other.y;
+    }
+
 	int Location::GetDistance(Location &other) const
 	{
 		return max(std::abs(other.x - x), std::abs(other.y - y));
 	}
 
-	Direction Location::GetDirection(Location &start, Location &end) const
+	Direction Location::GetDirection(Location &start, Location &end)
 	{
 		int horizontal = end.x - start.x;
 		int vertical = end.y - start.y;
@@ -52,35 +58,81 @@ namespace SnakeObjects
 		}
 	}
 
-	Location& Location::GetDestiny(Direction direction, int length) const
+	Location* Location::GetDestiny(Direction direction, int length) const
 	{
 		switch (direction)
 		{
 		case DirectionNorth:
-			return *(new Location(x, y + length));
+			return new Location(x, y + length);
 		
 		case DirectionSouth:
-			return *(new Location(x, y - length));
+			return new Location(x, y - length);
 		
 		case DirectionEast:
-			return *(new Location(x + length, y));
+			return new Location(x + length, y);
 		
 		case DirectionWest:
-			return *(new Location(x - length, y));
+			return new Location(x - length, y);
 		
 		default:
 			throw new std::logic_error("Dirección no reconocida.");
 		}
 	}
 
-	LocationList& Location::BuildList(Location& start, int length, Direction direction)
+	LocationListPointer Location::BuildList(Location& start, int length, Direction direction)
 	{
-		LocationList *lstLocations = new LocationList();
+        LocationListPointer lstLocations = new LocationList();
 		Location& source = start;
 
-		lstLocations->push_front(start.GetDestiny(direction, length));
-		lstLocations->push_front(start);
-
-		return *lstLocations;
+        lstLocations->push_front(*start.GetDestiny(direction, length));
+        lstLocations->push_front(Location(start.x, start.y));
+        
+		return lstLocations;
 	}
+
+	bool Location::IsTarget(Direction direction, Location& other) const
+	{
+		int onX = other.x - x
+			, onY = other.y - y;
+
+		if (onX == 0)
+		{
+			return direction == DirectionNorth 
+				? onY > 0
+				: (direction == DirectionSouth 
+					? onY < 0
+					: false);
+		}
+		else if (onY == 0)
+		{
+			return direction == DirectionEast
+				? onX > 0
+				: (direction == DirectionWest
+					? onX < 0
+					: false);
+		}
+
+		return false;
+	}
+
+    bool Location::IsBetween(Location& begin, Location& end) const
+    {
+        if (IsInLineWith(begin) && IsInLineWith(end))
+        {
+            return y == begin.y
+                ? min(begin.x, end.x) <= x && x <= max(begin.x, end.x)
+                : min(begin.y, end.y) <= y && y <= max(begin.y, end.y);
+        }
+        return false;
+    }
+
+    bool Location::IsInLineWith(Location& other) const
+    {
+        return x == other.x || y == other.y;
+    }
+
+    bool Location::operator==(Location& other) const
+    {
+        return x == other.x && y == other.y;
+    }
 }

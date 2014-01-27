@@ -83,6 +83,7 @@
   <ItemGroup>
     <ClCompile Include="ConsoleView.cpp" />
     <ClCompile Include="Location.cpp" />
+    <ClCompile Include="PartGenerator.cpp" />
     <ClCompile Include="Snake.cpp" />
     <ClCompile Include="SnakeConsole.cpp" />
     <ClCompile Include="Stage.cpp" />

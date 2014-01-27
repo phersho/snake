@@ -16,10 +16,12 @@ namespace SnakeObjects
 		
 		snake = new Snake(3, Location(height / 2, width / 2));
 		snake->SetDirection(direction);
+
+        newParts = nullptr;
 	}
 
 	/*
-	 * Unload a Stage.
+	 * Frees a Stage.
 	 */
 	Stage::~Stage()
 	{
@@ -27,7 +29,13 @@ namespace SnakeObjects
 		width = 0;
 		generator = nullptr;
 		direction = DirectionNone;
-		delete snake;
+        delete snake;
+
+        if (newParts != nullptr)
+        {
+            delete newParts;
+        }
+        newParts = nullptr;
 	}
 
 	/*
@@ -54,15 +62,54 @@ namespace SnakeObjects
 		return direction;
 	}
 
-	/*
-	 * Sets new direction.
-	 */
-	void Stage::SetDirection(Direction newDirection)
-	{
-		throw new std::logic_error("Not Implemented.");
-		direction = newDirection;
-		snake->SetDirection(newDirection);
+    Snake* Stage::GetSnake()
+    {
+        return snake;
+    }
 
-		//TODO must ends implementation
+	bool Stage::MakeTurnAction(TurnSnake action)
+	{
+		if (action != TurnSnakeLeft && action != TurnSnakeRight)
+		{
+			return false;
+		}
+
+		if (action == TurnSnakeRight)
+		{
+			switch (direction)
+			{
+			case DirectionNorth:
+				direction = action == TurnSnakeRight ? DirectionEast : DirectionWest;
+				break;
+			case DirectionEast:
+				direction = action == TurnSnakeRight ? DirectionSouth : DirectionNorth;
+				break;
+			case DirectionSouth:
+				direction = action == TurnSnakeRight ? DirectionWest : DirectionEast;
+				break;
+			case DirectionWest:
+				direction = action == TurnSnakeRight ? DirectionNorth : DirectionSouth;
+				break;
+			}
+		}
+
+		snake->SetDirection(direction);
+
+		return true;
 	}
+
+    void Stage::PlayTurn()
+    {
+        if (newParts == nullptr)
+        {
+            newParts = generator->Generate();
+        }
+        else if (newParts->empty())
+        {
+            delete newParts;
+            newParts = generator->Generate();
+        }
+
+        snake->Advance(newParts);
+    }
 }

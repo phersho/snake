@@ -8,6 +8,8 @@
 #define SNAKE_CONSOLE_HEIGHT 80
 #define SNAKE_CONSOLE_WIDTH 50
 
+using namespace SnakeObjects;
+
 namespace ConsoleView
 {
 	class SnakeView
@@ -22,23 +24,28 @@ namespace ConsoleView
 			, characterBufferSize;
 		CHAR_INFO* consoleBuffer;
 
-		WORD backgroundColor;
-		char backgroundChar;
+		WORD stageColor, snakeColor;
+		char stageChar, snakePart
+			, snakeBody, snakeHeadNorth, snakeHeadSouth, snakeHeadEast, snakeHeadWest;
 
 		bool isRunning
 			, redrawBuffer;
+
+		Stage* stage;
 
 		void HandleKeyboard(KEY_EVENT_RECORD& e);
 		void HandleMouse(MOUSE_EVENT_RECORD& e);
 		void FillConsoleRandomly();
 		void InitializeView(short height, short width);
+		void PlayTurn();
+        char GetHeadChar();
 
 	public:
 		SnakeView(short height, short width);
 		~SnakeView();
 
 		void ClearBuffer();
-		void Run();
+		void Play();
 	};
 }
 
