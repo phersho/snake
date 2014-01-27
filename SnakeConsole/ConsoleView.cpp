@@ -10,17 +10,13 @@ namespace ConsoleView
 	{
 		InitializeView(height, width);
 
-		SinglePartGenerator* g = new SinglePartGenerator();
-		stage = new Stage(height, width, g);
-		g->Snake = stage->GetSnake();
-		g->Stage = stage;
+		stage = new Stage(height, width, new SinglePartGenerator());
 
 		ClearBuffer();
 	}
 
 	SnakeView::~SnakeView()
 	{
-		delete[] consoleBuffer;
 		delete stage;
 	}
 
@@ -60,13 +56,15 @@ namespace ConsoleView
 		stageChar = ' ';
 		stageColor = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY;
 
-		snakePart = (char)0x09;
 		snakeBody = (char)0xDB;
 		snakeHeadNorth = (char)0x1E;
 		snakeHeadSouth = (char)0x1F;
 		snakeHeadEast = (char)0x10;
 		snakeHeadWest = (char)0x11;
 		snakeColor = FOREGROUND_GREEN | stageColor;
+
+        partChar = (char)0x09;
+        partColor = FOREGROUND_RED | snakeColor;
 	}
 
 	void SnakeView::ClearBuffer()
@@ -201,7 +199,7 @@ namespace ConsoleView
         {
             for (int x = 0; x < bufferSize.X; ++x)
             {
-                CHAR_INFO* current = consoleBuffer + (x + bufferSize.X * y);
+                CHAR_INFO* current = consoleBuffer + (x + bufferSize.X * (bufferSize.Y - 1 - y));
 
                 Location currentLocation(x, y);
 
@@ -211,13 +209,21 @@ namespace ConsoleView
                         ? GetHeadChar() : snakeBody;
                     current->Attributes = snakeColor;
                 }
+                else if (LocationIsNewPart(currentLocation))
+                {
+                    current->Char.AsciiChar = partChar;
+                    current->Attributes = partColor;
+                }
                 else
                 {
                     current->Char.AsciiChar = stageChar;
                     current->Attributes = stageColor;
                 }
+                stage->GetGenerator();
             }
         }
+
+        consoleBuffer[(bufferSize.X) * (bufferSize.Y)].Char.AsciiChar = '*';
     }
 
     char SnakeView::GetHeadChar()
@@ -234,5 +240,19 @@ namespace ConsoleView
             return snakeHeadWest;
         }
         return snakeBody;
+    }
+
+    bool SnakeView::LocationIsNewPart(Location& location)
+    {
+        for (auto i = stage->GetGenerator()->Generate()->begin();
+            i != stage->GetGenerator()->Generate()->end();
+            ++i)
+        {
+            if (*i == location)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

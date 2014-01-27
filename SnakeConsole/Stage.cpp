@@ -12,12 +12,11 @@ namespace SnakeObjects
 		this->height = height;
 		this->width = width;
 		this->generator = generator;
+        generator->Stage = this;
 		direction = SNAKE_DIRECTION_DEFAULT;
 		
 		snake = new Snake(3, Location(height / 2, width / 2));
 		snake->SetDirection(direction);
-
-        newParts = nullptr;
 	}
 
 	/*
@@ -27,15 +26,9 @@ namespace SnakeObjects
 	{
 		height = 0;
 		width = 0;
-		generator = nullptr;
+		delete generator;
 		direction = DirectionNone;
         delete snake;
-
-        if (newParts != nullptr)
-        {
-            delete newParts;
-        }
-        newParts = nullptr;
 	}
 
 	/*
@@ -65,6 +58,11 @@ namespace SnakeObjects
     Snake* Stage::GetSnake()
     {
         return snake;
+    }
+
+    IPartGenerator* Stage::GetGenerator()
+    {
+        return generator;
     }
 
 	bool Stage::MakeTurnAction(TurnSnake action)
@@ -97,16 +95,6 @@ namespace SnakeObjects
 
     void Stage::PlayTurn()
     {
-        if (newParts == nullptr)
-        {
-            newParts = generator->Generate();
-        }
-        else if (newParts->empty())
-        {
-            delete newParts;
-            newParts = generator->Generate();
-        }
-
-        snake->Advance(newParts);
+        snake->Advance(generator->Generate());
     }
 }

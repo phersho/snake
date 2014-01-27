@@ -89,13 +89,16 @@ namespace SnakeObjects
 	{
 	public:
 		Stage* Stage;
-		Snake* Snake;
 		virtual LocationListPointer Generate() = 0;
 	};
 
 	class SinglePartGenerator : public IPartGenerator
 	{
+    private:
+        LocationList generated;
 	public:
+        SinglePartGenerator();
+        ~SinglePartGenerator();
 		LocationListPointer Generate();
 	};
 
@@ -106,7 +109,6 @@ namespace SnakeObjects
 		Snake* snake;
 		Direction direction;
 		IPartGenerator* generator;
-        LocationListPointer newParts;
 
 	public:
 		Stage(int height, int width, IPartGenerator* generator);
@@ -116,6 +118,7 @@ namespace SnakeObjects
 		int GetWidth();
 		Direction GetDirection();
         Snake* GetSnake();
+        IPartGenerator* GetGenerator();
 		bool MakeTurnAction(TurnSnake action);
         void PlayTurn();
 	};

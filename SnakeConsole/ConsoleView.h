@@ -5,8 +5,8 @@
 #ifndef _CONSOLE_VIEW_H_
 #define _CONSOLE_VIEW_H_
 
-#define SNAKE_CONSOLE_HEIGHT 80
-#define SNAKE_CONSOLE_WIDTH 50
+#define SNAKE_CONSOLE_HEIGHT 20
+#define SNAKE_CONSOLE_WIDTH 20
 
 using namespace SnakeObjects;
 
@@ -24,8 +24,8 @@ namespace ConsoleView
 			, characterBufferSize;
 		CHAR_INFO* consoleBuffer;
 
-		WORD stageColor, snakeColor;
-		char stageChar, snakePart
+		WORD stageColor, snakeColor, partColor;
+		char stageChar, partChar
 			, snakeBody, snakeHeadNorth, snakeHeadSouth, snakeHeadEast, snakeHeadWest;
 
 		bool isRunning
@@ -40,6 +40,7 @@ namespace ConsoleView
 		void PlayTurn();
         char GetHeadChar();
         void DrawTurn();
+        bool LocationIsNewPart(Location& location);
 
 	public:
 		SnakeView(short height, short width);

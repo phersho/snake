@@ -27,7 +27,6 @@ namespace SnakeObjects
 	 */
 	Snake::~Snake()
 	{
-        body->clear();
         delete body;
 
 		length = 0;

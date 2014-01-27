@@ -3,10 +3,32 @@
 
 namespace SnakeObjects
 {
+    SinglePartGenerator::SinglePartGenerator()
+    {
+    }
+
+    SinglePartGenerator::~SinglePartGenerator()
+    {
+        generated.clear();
+    }
+
 	LocationListPointer SinglePartGenerator::Generate()
 	{
-		LocationListPointer g = new LocationList();
+        LocationPointer lp = nullptr;
 
-		return g;
+        while (generated.empty())
+        {
+            lp = new Location(rand() % Stage->GetWidth(), rand() % Stage->GetHeight());
+            if (Stage->GetSnake()->CanOverlap(*lp))
+            {
+                delete lp;
+            }
+            else
+            {
+                generated.push_front(*lp);
+            }
+        }
+
+		return &generated;
 	}
 }
