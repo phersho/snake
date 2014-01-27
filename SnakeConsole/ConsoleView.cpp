@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "ConsoleView.h"
 
 /*
  * Console implementations from [ http://benryves.com/tutorials/winconsole/ ].
@@ -103,6 +102,10 @@ namespace ConsoleView
     
 		isRunning = true;
 
+        DrawTurn();
+        WriteConsoleOutputA(writingHandler, consoleBuffer, characterBufferSize
+			, characterInitialPosition, &consoleWriteArea);
+
 		while (isRunning)
 		{
 			redrawBuffer = false;
@@ -121,14 +124,12 @@ namespace ConsoleView
 					}
 					else if (eventBuffer[i].EventType == MOUSE_EVENT)
 					{
-						HandleMouse(eventBuffer[i].Event.MouseEvent);
+						//HandleMouse(eventBuffer[i].Event.MouseEvent);
 					}
 				}
 
 				delete[] eventBuffer;
 			}
-
-			PlayTurn();
 
 			if (redrawBuffer)
 			{
@@ -144,24 +145,23 @@ namespace ConsoleView
 		{
 			isRunning = false;
 		}
-		else if (e.uChar.AsciiChar == 'c' || e.uChar.AsciiChar == 'C')
-		{
-			ClearBuffer();
-			redrawBuffer = true;
-		}
-		else if (e.uChar.AsciiChar == 'r' || e.uChar.AsciiChar == 'R')
-		{
-			FillConsoleRandomly();
-			redrawBuffer = true;
-		}
-		else if (e.wVirtualKeyCode == VK_LEFT)
+        else if (e.wVirtualKeyCode == VK_LEFT && e.bKeyDown == TRUE)
 		{
 			stage->MakeTurnAction(TurnSnakeLeft);
+            PlayTurn();
+            redrawBuffer = true;
 		}
-		else if (e.wVirtualKeyCode == VK_RIGHT)
+        else if (e.wVirtualKeyCode == VK_RIGHT && e.bKeyDown == TRUE)
 		{
 			stage->MakeTurnAction(TurnSnakeRight);
+            PlayTurn();
+            redrawBuffer = true;
 		}
+        else if (e.wVirtualKeyCode == VK_SPACE && e.bKeyDown == TRUE)
+        {
+            PlayTurn();
+            redrawBuffer = true;
+        }
 	}
 
 	void SnakeView::HandleMouse(MOUSE_EVENT_RECORD& e)
@@ -169,36 +169,32 @@ namespace ConsoleView
 		// Set the index to our buffer of CHAR_INFO
 		int offsetPos = e.dwMousePosition.X 
 			+ bufferSize.X * e.dwMousePosition.Y;
-		CHAR_INFO* position = consoleBuffer + (e.dwMousePosition.X + bufferSize.X * e.dwMousePosition.Y);
+		CHAR_INFO* position = consoleBuffer 
+            + (e.dwMousePosition.X + bufferSize.X * e.dwMousePosition.Y);
 
 		// left
 		if (e.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED) 
 		{
-			position->Char.AsciiChar = snakeBody;
-			position->Attributes = snakeColor;
-			redrawBuffer = true;
 		}
 		// right
 		else if (e.dwButtonState & RIGHTMOST_BUTTON_PRESSED)
 		{
-			position->Char.AsciiChar = (char)0xB1;
-			position->Attributes = snakeColor;
-			redrawBuffer = true;
 		}
 		// middle
 		else if (e.dwButtonState & FROM_LEFT_2ND_BUTTON_PRESSED)
 		{
-			position->Char.AsciiChar = stageChar;
-			position->Attributes = stageColor;
-			redrawBuffer = true;
 		}
 	}
 
 	void SnakeView::PlayTurn()
 	{
-        //stage->PlayTurn();
+        stage->PlayTurn();
+        DrawTurn();
+	}
+
+    void SnakeView::DrawTurn()
+    {
         LocationListPointer body = stage->GetSnake()->GetBody();
-		
         ClearBuffer(); // TODO research how to avoid it
 
         for (int y = 0; y < bufferSize.Y; ++y)
@@ -222,7 +218,7 @@ namespace ConsoleView
                 }
             }
         }
-	}
+    }
 
     char SnakeView::GetHeadChar()
     {

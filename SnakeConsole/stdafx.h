@@ -9,10 +9,12 @@
 
 #include <stdio.h>
 #include <tchar.h>
-
+#include <list>
 #include <stdlib.h>
 #include <Windows.h>
 
+#include "SnakeObjects.h"
+#include "ConsoleView.h"
 
 
 // TODO: reference additional headers your program requires here

@@ -1,7 +1,5 @@
 
-#include <stack>
-#include <list>
-#include <exception>
+
 #include "stdafx.h"
 
 #ifndef __SNAKEOBJECTS_H__
@@ -9,6 +7,7 @@
 
 #define SNAKE_MIN_LENGTH 2
 #define SNAKE_DIRECTION_DEFAULT DirectionEast
+#define SNAKE_MOV 1
 
 namespace SnakeObjects
 {
@@ -50,16 +49,16 @@ namespace SnakeObjects
 		int GetY() const;
         void Set(Location& other);
 
-		int GetDistance(Location& other) const;
+		int GetDistance(const Location& other) const;
 		LocationPointer GetDestiny(Direction direction, int length) const;
-		bool IsTarget(Direction direction, Location& other) const;
-        bool IsBetween(Location& begin, Location& end) const;
-        bool IsInLineWith(Location& other) const;
+		bool IsTarget(Direction direction, const Location& other) const;
+        bool IsBetween(const Location& begin, const Location& end) const;
+        bool IsInLineWith(const Location& other) const;
 
-		static Direction GetDirection(Location& start, Location& end);
-		static LocationListPointer BuildList(Location& start, int length, Direction direction);
+		Direction GetDirection(const Location& end) const;
+		static LocationListPointer BuildList(const Location& start, int length, Direction direction);
 
-        bool operator==(Location& other) const;
+        bool operator==(const Location& other) const;
 	};
 
 	class Snake
@@ -68,6 +67,9 @@ namespace SnakeObjects
 		int length;
 		Direction direction;
 		LocationListPointer body;
+        int minHeight, minWidth, maxHeight, maxWidht;
+
+        void RefreshLimits();
 
 	public:
 		Snake(int length, Location initial);

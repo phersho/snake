@@ -39,6 +39,7 @@ namespace ConsoleView
 		void InitializeView(short height, short width);
 		void PlayTurn();
         char GetHeadChar();
+        void DrawTurn();
 
 	public:
 		SnakeView(short height, short width);

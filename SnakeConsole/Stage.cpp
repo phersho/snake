@@ -74,23 +74,20 @@ namespace SnakeObjects
 			return false;
 		}
 
-		if (action == TurnSnakeRight)
+		switch (direction)
 		{
-			switch (direction)
-			{
-			case DirectionNorth:
-				direction = action == TurnSnakeRight ? DirectionEast : DirectionWest;
-				break;
-			case DirectionEast:
-				direction = action == TurnSnakeRight ? DirectionSouth : DirectionNorth;
-				break;
-			case DirectionSouth:
-				direction = action == TurnSnakeRight ? DirectionWest : DirectionEast;
-				break;
-			case DirectionWest:
-				direction = action == TurnSnakeRight ? DirectionNorth : DirectionSouth;
-				break;
-			}
+		case DirectionNorth:
+			direction = action == TurnSnakeRight ? DirectionEast : DirectionWest;
+			break;
+		case DirectionEast:
+			direction = action == TurnSnakeRight ? DirectionSouth : DirectionNorth;
+			break;
+		case DirectionSouth:
+			direction = action == TurnSnakeRight ? DirectionWest : DirectionEast;
+			break;
+		case DirectionWest:
+			direction = action == TurnSnakeRight ? DirectionNorth : DirectionSouth;
+			break;
 		}
 
 		snake->SetDirection(direction);

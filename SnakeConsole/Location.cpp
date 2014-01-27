@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "SnakeObjects.h"
 
 namespace SnakeObjects
 {
@@ -31,15 +30,15 @@ namespace SnakeObjects
         y = other.y;
     }
 
-	int Location::GetDistance(Location &other) const
+	int Location::GetDistance(const Location &other) const
 	{
 		return max(std::abs(other.x - x), std::abs(other.y - y));
 	}
 
-	Direction Location::GetDirection(Location &start, Location &end)
+	Direction Location::GetDirection(const Location &end) const
 	{
-		int horizontal = end.x - start.x;
-		int vertical = end.y - start.y;
+		int horizontal = end.x - x;
+		int vertical = end.y - y;
 
 		if (horizontal == 0 && vertical == 0)
 		{
@@ -79,10 +78,10 @@ namespace SnakeObjects
 		}
 	}
 
-	LocationListPointer Location::BuildList(Location& start, int length, Direction direction)
+	LocationListPointer Location::BuildList(const Location& start, int length, Direction direction)
 	{
         LocationListPointer lstLocations = new LocationList();
-		Location& source = start;
+		const Location& source = start;
 
         lstLocations->push_front(*start.GetDestiny(direction, length));
         lstLocations->push_front(Location(start.x, start.y));
@@ -90,7 +89,7 @@ namespace SnakeObjects
 		return lstLocations;
 	}
 
-	bool Location::IsTarget(Direction direction, Location& other) const
+	bool Location::IsTarget(Direction direction, const Location& other) const
 	{
 		int onX = other.x - x
 			, onY = other.y - y;
@@ -115,7 +114,7 @@ namespace SnakeObjects
 		return false;
 	}
 
-    bool Location::IsBetween(Location& begin, Location& end) const
+    bool Location::IsBetween(const Location& begin, const Location& end) const
     {
         if (IsInLineWith(begin) && IsInLineWith(end))
         {
@@ -126,12 +125,12 @@ namespace SnakeObjects
         return false;
     }
 
-    bool Location::IsInLineWith(Location& other) const
+    bool Location::IsInLineWith(const Location& other) const
     {
         return x == other.x || y == other.y;
     }
 
-    bool Location::operator==(Location& other) const
+    bool Location::operator==(const Location& other) const
     {
         return x == other.x && y == other.y;
     }

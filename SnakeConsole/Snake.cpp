@@ -1,7 +1,4 @@
 #include "stdafx.h"
-#include "SnakeObjects.h"
-
-#include <exception>
 
 namespace SnakeObjects
 {
@@ -18,6 +15,11 @@ namespace SnakeObjects
 		this->length = length;
 		direction = SNAKE_DIRECTION_DEFAULT;
 		body = Location::BuildList(initial, length, DirectionWest);
+
+        minHeight = min(initial.GetY(), body->back().GetY());
+        minWidth = min(initial.GetX(), body->back().GetX());
+        maxHeight = max(initial.GetY(), body->back().GetY());
+        maxWidht = max(initial.GetX(), body->back().GetX());
 	}
 
 	/*
@@ -89,36 +91,83 @@ namespace SnakeObjects
         return IsTarget(location) && body->front().GetDistance(location) == 0;
 	}
 
-    void Snake::Advance(LocationListPointer list)
+    void Snake::RefreshLimits()
     {
-        Location head = body->front();
+        minHeight = INT_MAX;
+        minWidth = INT_MAX;
+        maxHeight = INT_MIN;
+        maxWidht = INT_MIN;
+
+        for (auto current = body->begin(); current != body->end(); ++current)
+        {
+            minHeight = min(minHeight, current->GetY());
+            minWidth = min(minWidth, current->GetX());
+            maxHeight = max(maxHeight, current->GetY());
+            maxWidht = max(maxWidht, current->GetX());
+        }
+    }
+
+    void Snake::Advance(LocationListPointer newParts)
+    {
+        Location& head = body->front();
         bool withoutNews = true;
+        Location partAdded = head;
 
         // evaluates if snake will have new parts
-        for (auto i = list->begin(); i != list->end(); ++i)
+        for (auto i = newParts->begin(); i != newParts->end(); ++i)
         {
-            if (head.IsTarget(direction, *i)
-                && head.GetDistance(*i) != 0)
+            if (head.IsTarget(direction, *i) && head.GetDistance(*i) == SNAKE_MOV)
             {
                 head.Set(*i);
                 withoutNews = false;
+                partAdded = *i;
                 break;
             }
         }
 
         if (withoutNews)
         {
-            Location lastChecked = head;
-            
-            for (auto i = list->begin(); i != list->end(); ++i)
+            LocationPointer lastChecked = nullptr, newHead = nullptr, newPosition;
+            Direction toDirection;
+            bool deleteTail = false, deleteOldHead = false;
+
+            for (auto current = body->begin(); current != body->end(); ++current)
             {
-                if (lastChecked == *i)
+                if (*current == head)
                 {
-                    continue;
+                    newHead = current->GetDestiny(direction, SNAKE_MOV);
+                    deleteOldHead = current->IsBetween(current._Ptr->_Next->_Myval, *newHead);
                 }
+                else if (*current == body->back())
+                {
+                    toDirection = current->GetDirection(*lastChecked);
+                    newPosition = current->GetDestiny(toDirection, SNAKE_MOV);
+                    current->Set(*newPosition);
+                    delete newPosition;
+                    deleteTail = *current == *lastChecked;
+                }
+                
+                lastChecked = &*current;
+            }
 
-
+            if (deleteTail)
+            {
+                body->pop_back();
+            }
+            if (deleteOldHead)
+            {
+                body->pop_front();
+            }
+            if (newHead != nullptr)
+            {
+                body->push_front(*newHead);
             }
         }
+        else
+        {
+            newParts->remove(partAdded);
+        }
+
+        RefreshLimits();
     }
 }
