@@ -2,93 +2,89 @@
 
 namespace SnakeObjects
 {
-	/*
-	 * Creates an instance of Snake.
-	 */
-	Snake::Snake(int length, Location initial)
-	{
-		if (length < SNAKE_MIN_LENGTH)
-		{
-			throw new std::logic_error("Longitud inicial");
-		}
+    /*
+     * Creates an instance of Snake.
+     */
+    Snake::Snake(int length, Location initial)
+    {
+        if (length < SNAKE_MIN_LENGTH)
+        {
+            throw new std::logic_error("Longitud inicial");
+        }
 
-		this->length = length;
-		direction = SNAKE_DIRECTION_DEFAULT;
-		body = Location::BuildList(initial, length, DirectionWest);
+        this->length = length;
+        direction = SNAKE_DIRECTION_DEFAULT;
+        body = Location::BuildList(initial, length, DirectionWest);
 
         minHeight = min(initial.GetY(), body->back().GetY());
         minWidth = min(initial.GetX(), body->back().GetX());
         maxHeight = max(initial.GetY(), body->back().GetY());
         maxWidht = max(initial.GetX(), body->back().GetX());
-	}
+    }
 
-	/*
-	 * Unloads an instance of Snake.
-	 */
-	Snake::~Snake()
-	{
+    /*
+     * Unloads an instance of Snake.
+     */
+    Snake::~Snake()
+    {
         delete body;
 
-		length = 0;
-		direction = DirectionNone;
-	}
+        length = 0;
+        direction = DirectionNone;
+    }
 
-	/*
-	 * Gets current direction.
-	 */
-	Direction Snake::GetDirection()
-	{
-		return direction;
-	}
+    /*
+     * Gets current direction.
+     */
+    Direction Snake::GetDirection() const
+    {
+        return direction;
+    }
 
-	/*
-	 * Sets a new direction.
-	 */
-	void Snake::SetDirection(Direction newDirection)
-	{
-		direction = newDirection;
-	}
+    /*
+     * Sets a new direction.
+     */
+    void Snake::SetDirection(Direction newDirection)
+    {
+        direction = newDirection;
+    }
 
-	/*
-	 * Gets access to body inside.
-	 */
-	LocationListPointer Snake::GetBody()
-	{
-		return body;
-	}
+    /*
+     * Gets access to body inside.
+     */
+    LocationListPointer Snake::GetBody() const
+    {
+        return body;
+    }
 
-	bool Snake::CanOverlap(Location& location)
-	{
-        Location previous = body->front();
+    bool Snake::CanOverlap(const Location& location) const
+    {
+        LocationPointer previous = &body->front();
         for (auto current = body->begin(); current != body->end(); ++current)
         {
-            if (previous == *current)
-            {
-                continue;
-            }
-
-            if (location.IsBetween(previous, *current))
+            if (location.IsBetween(*previous, *current, true))
             {
                 return true;
             }
+            previous = &current._Ptr->_Myval;
         }
-		return false;
-	}
+        return false;
+    }
 
-	bool Snake::IsTarget(Location& location)
-	{
+    bool Snake::IsTarget(const Location& location) const
+    {
         return body->front().IsTarget(direction, location);
-	}
+    }
 
-	bool Snake::IsHead(Location& other)
-	{
+    bool Snake::IsHead(const Location& other) const
+    {
         return other == body->front();
-	}
+    }
 
-	bool Snake::IsCollided(Location location)
-	{
+    bool Snake::IsCollided(const Location& location) const
+    {
         return IsTarget(location) && body->front().GetDistance(location) == 0;
-	}
+    }
 
     void Snake::RefreshLimits()
     {
@@ -135,7 +131,7 @@ namespace SnakeObjects
                 if (*current == head)
                 {
                     newHead = current->GetDestiny(direction, SNAKE_MOV);
-                    deleteOldHead = current->IsBetween(current._Ptr->_Next->_Myval, *newHead);
+                    deleteOldHead = current->IsBetween(current._Ptr->_Next->_Myval, *newHead, false);
                 }
                 else if (*current == body->back())
                 {

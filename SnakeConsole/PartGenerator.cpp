@@ -12,8 +12,8 @@ namespace SnakeObjects
         generated.clear();
     }
 
-	LocationListPointer SinglePartGenerator::Generate()
-	{
+    LocationListPointer SinglePartGenerator::Generate()
+    {
         LocationPointer lp = nullptr;
 
         while (generated.empty())
@@ -29,6 +29,6 @@ namespace SnakeObjects
             }
         }
 
-		return &generated;
-	}
+        return &generated;
+    }
 }
