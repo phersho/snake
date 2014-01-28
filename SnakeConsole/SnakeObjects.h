@@ -48,6 +48,7 @@ namespace SnakeObjects
         int GetX() const;
         int GetY() const;
         void Set(Location& other);
+        void Move(int count, Direction direction);
 
         int GetDistance(const Location& other) const;
         LocationPointer GetDestiny(Direction direction, int length) const;
@@ -70,6 +71,7 @@ namespace SnakeObjects
         int minHeight, minWidth, maxHeight, maxWidth;
 
         void RefreshLimits();
+        bool CheckBody() const;
 
     public:
         Snake(int length, Location initial);

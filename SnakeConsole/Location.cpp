@@ -40,21 +40,21 @@ namespace SnakeObjects
         int horizontal = end.x - x;
         int vertical = end.y - y;
 
-        if (horizontal == 0 && vertical == 0)
+        if ((horizontal == 0 && vertical != 0) || (horizontal != 0 && vertical == 0))
         {
-            return DirectionNone;
+            if (horizontal == 0)
+            {
+                return vertical > 0
+                    ? DirectionNorth : DirectionSouth;
+            }
+            else
+            {
+                return horizontal > 0
+                    ? DirectionEast : DirectionWest;
+            }
         }
 
-        if (horizontal == 0)
-        {
-            return vertical > 0
-                ? DirectionNorth : DirectionSouth;
-        }
-        else
-        {
-            return horizontal > 0
-                ? DirectionEast : DirectionWest;
-        }
+        return DirectionNone;
     }
 
     Location* Location::GetDestiny(Direction direction, int length) const
@@ -116,7 +116,7 @@ namespace SnakeObjects
 
     bool Location::IsBetween(const Location& begin, const Location& end, bool inclusive) const
     {
-        if (IsInLineWith(begin) && IsInLineWith(end))
+        if (IsInLineWith(begin) && IsInLineWith(end) && begin.IsInLineWith(end))
         {
             if (inclusive)
             {
@@ -142,5 +142,24 @@ namespace SnakeObjects
     bool Location::operator==(const Location& other) const
     {
         return x == other.x && y == other.y;
+    }
+
+    void Location::Move(int count, Direction direction)
+    {
+        switch (direction)
+        {
+        case DirectionNorth:
+            y += count;
+            break;
+        case DirectionSouth:
+            y -= count;
+            break;
+        case DirectionEast:
+            x += count;
+            break;
+        case DirectionWest:
+            x -= count;
+            break;
+        }
     }
 }

@@ -121,61 +121,58 @@ namespace SnakeObjects
     {
         Location& head = body->front();
         bool withoutNews = true;
-        Location partAdded = head;
+        LocationPointer partAdded;
 
         // evaluates if snake will have new parts
         for (auto i = newParts->begin(); i != newParts->end(); ++i)
         {
             if (head.IsTarget(direction, *i) && head.GetDistance(*i) == SNAKE_MOV)
             {
-                head.Set(*i);
+                if (head.IsBetween(*(++body->begin()), *i, false))
+                {
+                    head.Move(SNAKE_MOV, direction);
+                }
+                else
+                {
+                    body->push_front(*i);
+                }
+
                 withoutNews = false;
-                partAdded = *i;
+                partAdded = &*i;
                 break;
             }
         }
 
         if (withoutNews)
         {
-            LocationPointer lastChecked = nullptr, newHead = nullptr, newPosition;
-            Direction toDirection;
-            bool deleteTail = false, deleteOldHead = false;
-
-            for (auto current = body->begin(); current != body->end(); ++current)
+            auto newHead = head.GetDestiny(direction, SNAKE_MOV);
+            if (head.IsBetween(*newHead, *(++body->begin()), false))
             {
-                if (*current == head)
-                {
-                    newHead = current->GetDestiny(direction, SNAKE_MOV);
-                    deleteOldHead = current->IsBetween(current._Ptr->_Next->_Myval, *newHead, false);
-                }
-                else if (*current == body->back())
-                {
-                    toDirection = current->GetDirection(*lastChecked);
-                    newPosition = current->GetDestiny(toDirection, SNAKE_MOV);
-                    current->Set(*newPosition);
-                    delete newPosition;
-                    deleteTail = *current == *lastChecked;
-                }
-                
-                lastChecked = &*current;
+                head.Set(*newHead);
+                delete newHead;
             }
-
-            if (deleteTail)
-            {
-                body->pop_back();
-            }
-            if (deleteOldHead)
-            {
-                body->pop_front();
-            }
-            if (newHead != nullptr)
+            else
             {
                 body->push_front(*newHead);
             }
+
+            auto final = --body->end();
+            auto before = ----body->end();
+            
+            auto newTail = final->GetDestiny(final->GetDirection(*before), SNAKE_MOV);
+            if (*newTail == *before)
+            {
+                body->pop_back();
+            }
+            else
+            {
+                final->Set(*newTail);
+            }
+            delete newTail;
         }
         else
         {
-            newParts->remove(partAdded);
+            newParts->remove(*partAdded);
         }
 
         RefreshLimits();
@@ -213,5 +210,24 @@ namespace SnakeObjects
         }
 
         return false;
+    }
+
+    bool Snake::CheckBody() const
+    {
+        LocationPointer last = nullptr, head = &body->front();
+        for (auto current = body->begin(); current != body->end(); ++current)
+        {
+            if (!(*current == *head))
+            {
+                if (current->GetDirection(*last) == DirectionNone)
+                {
+                    return false;
+                }
+            }
+
+            last = &*current;
+        }
+
+        return true;
     }
 }
