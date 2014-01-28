@@ -7,7 +7,6 @@ Controls
 * ESC Exit
 * Left Arrow Make a left
 * Right Arrow Make a right
-* 
 
 Notes
 -----
