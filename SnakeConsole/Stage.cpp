@@ -15,7 +15,7 @@ namespace SnakeObjects
         generator->Stage = this;
         direction = SNAKE_DIRECTION_DEFAULT;
         
-        snake = new Snake(3, Location(height / 2, width / 2));
+        snake = new Snake(2, Location(height / 2, width / 2));
         snake->SetDirection(direction);
     }
 
@@ -108,5 +108,13 @@ namespace SnakeObjects
     void Stage::PlayTurn()
     {
         snake->Advance(generator->Generate());
+    }
+
+    /*
+     * Indicates if snake is contained inside the stage.
+     */
+    bool Stage::IsSnakeContained() const
+    {
+        return snake->IsInside(0, 0, width - 1, height - 1);
     }
 }

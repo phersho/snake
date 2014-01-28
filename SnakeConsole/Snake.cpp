@@ -16,10 +16,7 @@ namespace SnakeObjects
         direction = SNAKE_DIRECTION_DEFAULT;
         body = Location::BuildList(initial, length, DirectionWest);
 
-        minHeight = min(initial.GetY(), body->back().GetY());
-        minWidth = min(initial.GetX(), body->back().GetX());
-        maxHeight = max(initial.GetY(), body->back().GetY());
-        maxWidht = max(initial.GetX(), body->back().GetX());
+        RefreshLimits();
     }
 
     /*
@@ -57,6 +54,9 @@ namespace SnakeObjects
         return body;
     }
 
+    /*
+     * Indicates if 'location' can overlap this snake.
+     */
     bool Snake::CanOverlap(const Location& location) const
     {
         LocationPointer previous = &body->front();
@@ -71,37 +71,52 @@ namespace SnakeObjects
         return false;
     }
 
+    /*
+     * Indicates if 'location' is target of this snake.
+     */
     bool Snake::IsTarget(const Location& location) const
     {
         return body->front().IsTarget(direction, location);
     }
 
+    /*
+     * Indicates if 'location' is the head of this snake.
+     */
     bool Snake::IsHead(const Location& other) const
     {
         return other == body->front();
     }
 
+    /*
+     * Indicates if this snake is collisioning with 'location'.
+     */
     bool Snake::IsCollided(const Location& location) const
     {
         return IsTarget(location) && body->front().GetDistance(location) == 0;
     }
 
+    /*
+     * Refreshes limits of snake's area.
+     */
     void Snake::RefreshLimits()
     {
         minHeight = INT_MAX;
         minWidth = INT_MAX;
         maxHeight = INT_MIN;
-        maxWidht = INT_MIN;
+        maxWidth = INT_MIN;
 
         for (auto current = body->begin(); current != body->end(); ++current)
         {
             minHeight = min(minHeight, current->GetY());
             minWidth = min(minWidth, current->GetX());
             maxHeight = max(maxHeight, current->GetY());
-            maxWidht = max(maxWidht, current->GetX());
+            maxWidth = max(maxWidth, current->GetX());
         }
     }
 
+    /*
+     * Advances this snake by its state.
+     */
     void Snake::Advance(LocationListPointer newParts)
     {
         Location& head = body->front();
@@ -164,5 +179,39 @@ namespace SnakeObjects
         }
 
         RefreshLimits();
+    }
+
+    /*
+     * Indicates if this snake is inside the coordinates indicated.
+     */
+    bool Snake::IsInside(const int x1, const int y1, const int x2, const int y2) const
+    {
+        return x1 <= minWidth && y1 <= minHeight 
+            && maxWidth <= x2 && maxHeight <= y2;
+    }
+
+    /*
+     * Indicates if this snake has collided with itself.
+     */
+    bool Snake::IsCollidedInside() const
+    {
+        LocationPointer last;
+        for (auto current = body->begin(); current != body->end(); ++current)
+        {
+            if (!(*current == body->front()))
+            {
+                if (!(*last == body->front()))
+                {
+                    if (body->front().IsBetween(*current, *last, true))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            last = &*current;
+        }
+
+        return false;
     }
 }

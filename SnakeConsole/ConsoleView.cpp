@@ -53,6 +53,9 @@ namespace ConsoleView
         consoleWriteArea.Right = height - 1;
         consoleWriteArea.Bottom = width - 1;
 
+        CONSOLE_CURSOR_INFO cursor = { 1, FALSE };
+        SetConsoleCursorInfo(writingHandler, &cursor);
+
         stageChar = ' ';
         stageColor = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY;
 
@@ -65,6 +68,10 @@ namespace ConsoleView
 
         partChar = (char)0x09;
         partColor = FOREGROUND_RED | snakeColor;
+
+        errorChar = (char)0x0F;
+        errorColor = BACKGROUND_RED | BACKGROUND_INTENSITY
+            | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
     }
 
     void SnakeView::ClearBuffer()
@@ -99,6 +106,7 @@ namespace ConsoleView
         DWORD numEventsRead = 0;
     
         isRunning = true;
+        snakeCanContinue = true;
 
         DrawTurn();
         WriteConsoleOutputA(writingHandler, consoleBuffer, characterBufferSize
@@ -194,27 +202,30 @@ namespace ConsoleView
 
     void SnakeView::PlayTurn()
     {
-        UpdateState();
-        DrawTurn();
+        if (snakeCanContinue)
+        {
+            UpdateState();
+            DrawTurn();
+        }
     }
 
     void SnakeView::DrawTurn()
     {
         LocationListPointer body = stage->GetSnake()->GetBody();
         LocationPointer currentLocation;
+        CHAR_INFO* current;
 
         for (int y = 0; y < bufferSize.Y; ++y)
         {
             for (int x = 0; x < bufferSize.X; ++x)
             {
-                CHAR_INFO* current = consoleBuffer + (x + bufferSize.X * (bufferSize.Y - 1 - y));
+                current = consoleBuffer + CONSOLE_GET(x, y, bufferSize.X, bufferSize.Y);
 
                 currentLocation = new Location(x, y);
 
                 if (stage->GetSnake()->CanOverlap(*currentLocation))
                 {
-                    current->Char.AsciiChar = stage->GetSnake()->IsHead(*currentLocation) 
-                        ? GetHeadChar() : snakeBody;
+                    current->Char.AsciiChar = snakeBody;
                     current->Attributes = snakeColor;
                 }
                 else if (LocationIsNewPart(*currentLocation))
@@ -230,6 +241,33 @@ namespace ConsoleView
                 
                 delete currentLocation;
             }
+        }
+
+        if (snakeCanContinue)
+        {
+            current = consoleBuffer 
+                + CONSOLE_GET(body->front().GetX(), body->front().GetY(), stage->GetWidth(), stage->GetHeight());
+            current->Char.AsciiChar = GetHeadChar();
+            current->Attributes = snakeColor;
+        }
+        else
+        {
+            if (stage->GetSnake()->IsCollidedInside())
+            {
+                current = consoleBuffer 
+                    + CONSOLE_GET(body->front().GetX(), body->front().GetY(), stage->GetWidth(), stage->GetHeight());
+                current->Char.AsciiChar = errorChar;
+                current->Attributes = errorColor;
+            }
+
+            consoleBuffer[0].Char.AsciiChar = 'F';
+            consoleBuffer[1].Char.AsciiChar = 'A';
+            consoleBuffer[2].Char.AsciiChar = 'I';
+            consoleBuffer[3].Char.AsciiChar = 'L';
+            consoleBuffer[0].Attributes = errorColor;
+            consoleBuffer[1].Attributes = errorColor;
+            consoleBuffer[2].Attributes = errorColor;
+            consoleBuffer[3].Attributes = errorColor;
         }
 
         redrawBuffer = true;
@@ -277,6 +315,9 @@ namespace ConsoleView
         }
 
         stage->PlayTurn();
+
+        snakeCanContinue = stage->IsSnakeContained()
+            && !stage->GetSnake()->IsCollidedInside();
     }
 
     void SnakeView::ResetControl()

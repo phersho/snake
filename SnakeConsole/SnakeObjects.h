@@ -67,7 +67,7 @@ namespace SnakeObjects
         int length;
         Direction direction;
         LocationListPointer body;
-        int minHeight, minWidth, maxHeight, maxWidht;
+        int minHeight, minWidth, maxHeight, maxWidth;
 
         void RefreshLimits();
 
@@ -75,6 +75,7 @@ namespace SnakeObjects
         Snake(int length, Location initial);
         ~Snake();
 
+        Location GetHead() const;
         Direction GetDirection() const;
         void SetDirection(Direction newDirection);
         LocationListPointer GetBody() const;
@@ -83,6 +84,8 @@ namespace SnakeObjects
         bool IsCollided(const Location& location) const;
         bool IsTarget(const Location& location) const;
         void Advance(LocationListPointer list);
+        bool IsInside(const int x1, const int y1, const int x2, const int y2) const;
+        bool IsCollidedInside() const;
     };
 
     class IPartGenerator
@@ -121,6 +124,7 @@ namespace SnakeObjects
         IPartGenerator* GetGenerator();
         bool MakeTurnAction(TurnSnake action);
         void PlayTurn();
+        bool IsSnakeContained() const;
     };
 }
 
