@@ -192,14 +192,14 @@ namespace SnakeObjects
      */
     bool Snake::IsCollidedInside() const
     {
-        LocationPointer last;
+        LocationPointer last, head = &body->front();
         for (auto current = body->begin(); current != body->end(); ++current)
         {
-            if (!(*current == body->front()))
+            if (!(&*current == head))
             {
-                if (!(*last == body->front()))
+                if (!(&*last == head))
                 {
-                    if (body->front().IsBetween(*current, *last, true))
+                    if (head->IsBetween(*current, *last, true))
                     {
                         return true;
                     }

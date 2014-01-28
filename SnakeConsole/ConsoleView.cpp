@@ -25,6 +25,8 @@ namespace ConsoleView
         writingHandler = GetStdHandle(STD_OUTPUT_HANDLE);
         readingHandler = GetStdHandle(STD_INPUT_HANDLE);
 
+        SetConsoleTitle(TEXT("Snake by Fernando Camacho"));
+
         windowSize = SMALL_RECT();
         windowSize.Left = 0;
         windowSize.Top = 0;

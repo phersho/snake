@@ -7,10 +7,10 @@
 
 #define CONSOLE_GET(x, y, lx, ly) ((x) + ((lx) * ((ly) - (y) - 1)))
 
-#define SNAKE_CONSOLE_HEIGHT 20
-#define SNAKE_CONSOLE_WIDTH 20
-#define GAME_SLEEP 1000
-#define GAME_MODE_ENABLED false
+#define SNAKE_CONSOLE_HEIGHT 30
+#define SNAKE_CONSOLE_WIDTH 30
+#define GAME_SLEEP 200
+#define GAME_MODE_ENABLED true
 
 using namespace SnakeObjects;
 
